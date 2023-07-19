@@ -23,6 +23,7 @@ func (server *SocketServer) Init(config config.Config) {
 func (self *SocketServer) RunServer() {
 	fmt.Println("Server Running...")
 	address := self.Host + ":" + self.Port
+	fmt.Println("address =", address)
 	server, err := net.Listen(self.Type, address)
 	if err != nil {
 		log.Fatal(err.Error())

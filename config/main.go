@@ -17,6 +17,7 @@ func LoadConfig() Config {
 
 	loadedConfig.Host = os.Getenv("HOST")
 	port := os.Getenv("PORT")
+	loadedConfig.Port = port
 
 	if port == "" {
 		// return default config
