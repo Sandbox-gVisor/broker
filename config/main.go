@@ -1,31 +1,20 @@
 package config
 
-import (
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
-)
-
 func LoadConfig() Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	var (
+		config Config
+		err    error
+	)
+	// load from argparse
+	config, err = parseCliArgs()
+	if err == nil {
+		return config
 	}
-
-	loadedConfig := Config{}
-
-	loadedConfig.Host = os.Getenv("HOST")
-	port := os.Getenv("PORT")
-	loadedConfig.Port = port
-
-	if port == "" {
-		// return default config
-		loadedConfig.Host = "localhost"
-		loadedConfig.Port = "9988"
-		loadedConfig.Type = "tcp"
-		return loadedConfig
+	config, err = loadEnv()
+	if err == nil {
+		return config
 	}
-	loadedConfig.Type = os.Getenv("TYPE")
-	return loadedConfig
+	config.Address = "localhost:9988"
+	config.Type = "tcp"
+	return config
 }

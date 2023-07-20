@@ -9,27 +9,23 @@ import (
 )
 
 type SocketServer struct {
-	Host string
-	Port string
-	Type string
+	Address string
+	Type    string
 }
 
-func (server *SocketServer) Init(config config.Config) {
-	server.Host = config.Host
-	server.Port = config.Port
-	server.Type = config.Type
+func (self *SocketServer) Init(config config.Config) {
+	self.Address = config.Address
+	self.Type = config.Type
 }
 
 func (self *SocketServer) RunServer() {
 	fmt.Println("Server Running...")
-	address := self.Host + ":" + self.Port
-	fmt.Println("address =", address)
-	server, err := net.Listen(self.Type, address)
+	server, err := net.Listen(self.Type, self.Address)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	defer server.Close()
-	log.Print("Listening on " + address)
+	log.Print("Listening on " + self.Address)
 	for {
 		connection, err := server.Accept()
 		if err != nil {
