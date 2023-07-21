@@ -1,6 +1,7 @@
 package ws_server
 
 import (
+	"broker/rabbit"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,12 +14,12 @@ const (
 	PullCmd = "pull"
 )
 
-func RunWS() {
+func RunWS(broker rabbit.MessageBroker) {
 	fmt.Println("Running ws")
 	http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		conn, _, _, err := ws.UpgradeHTTP(r, w)
 		if err != nil {
-			// handle error
+			log.Fatal(err)
 		}
 		go func() {
 			defer conn.Close()
@@ -31,12 +32,16 @@ func RunWS() {
 					continue
 				}
 				if string(msg) == PullCmd {
-					// TODO read data from message broker row by row
-					err = wsutil.WriteServerMessage(conn, op, msg)
-					if err != nil {
-						log.Println(err)
-						continue
-					}
+					messages := broker.Read()
+					go func() {
+						for m := range messages {
+							err = wsutil.WriteServerMessage(conn, op, m.Body)
+							if err != nil {
+								log.Println(err)
+								continue
+							}
+						}
+					}()
 				}
 			}
 		}()
