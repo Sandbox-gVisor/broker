@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 
-	"broker/config"
 	"broker/rabbit"
 )
 
@@ -15,10 +14,10 @@ type SocketServer struct {
 	Type    string
 }
 
-func (self *SocketServer) Init(config config.Config, broker rabbit.MessageBroker) {
+func (self *SocketServer) Init(broker rabbit.MessageBroker, address string, t string) {
 	self.Broker = broker
-	self.Address = config.Address
-	self.Type = config.Type
+	self.Address = address
+	self.Type = t
 }
 
 func (self *SocketServer) RunServer() {

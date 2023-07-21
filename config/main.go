@@ -1,5 +1,15 @@
 package config
 
+func getDefaultConfig() Config {
+	return Config{
+		Address:       "localhost:9988",
+		Type:          "tcp",
+		WebsoketPort:  "8080",
+		QueueName:     "main",
+		RabbitAddress: "amqp://guest:guest@localhost:5672/",
+	}
+}
+
 func LoadConfig() Config {
 	var (
 		config Config
@@ -14,7 +24,6 @@ func LoadConfig() Config {
 	if err == nil {
 		return config
 	}
-	config.Address = "localhost:9988"
-	config.Type = "tcp"
-	return config
+	// return default config
+	return getDefaultConfig()
 }

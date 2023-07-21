@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strconv"
-
 	"broker/config"
 	"broker/rabbit"
 	socketserver "broker/socket_server"
@@ -10,17 +8,14 @@ import (
 )
 
 func main() {
-	var mb rabbit.MessageBroker
-	mb.Open("amqp://guest:guest@localhost:5672", "main")
-	defer mb.Close()
-	// TODO delete it
-	for i := 0; i < 10; i++ {
-		mb.Send(strconv.Itoa(i))
-	}
-	// ---
 	conf := config.LoadConfig()
-	go ws_server.RunWS(mb)
+
+	var mb rabbit.MessageBroker
+	mb.Open(conf.RabbitAddress, conf.QueueName)
+	defer mb.Close()
+	go ws_server.RunWS(mb, ":"+conf.WebsoketPort)
+
 	ss := socketserver.SocketServer{}
-	ss.Init(conf, mb)
+	ss.Init(mb, conf.Address, conf.Type)
 	ss.RunServer()
 }
