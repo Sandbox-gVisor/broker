@@ -2,10 +2,15 @@ package ws_server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
+)
+
+const (
+	PullCmd = "pull"
 )
 
 func RunWS() {
@@ -22,11 +27,16 @@ func RunWS() {
 				msg, op, err := wsutil.ReadClientData(conn)
 				fmt.Println(string(msg))
 				if err != nil {
-					// handle error
+					log.Println(err)
+					continue
 				}
-				err = wsutil.WriteServerMessage(conn, op, msg)
-				if err != nil {
-					// handle error
+				if string(msg) == PullCmd {
+					// TODO read data from message broker row by row
+					err = wsutil.WriteServerMessage(conn, op, msg)
+					if err != nil {
+						log.Println(err)
+						continue
+					}
 				}
 			}
 		}()
