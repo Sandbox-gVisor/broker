@@ -7,7 +7,7 @@ import (
 )
 
 func parseCliArgs() (Config, error) {
-	parser := argparse.NewParser("sandbox-cli", "tool for in-time configuraion gVisor")
+	parser := argparse.NewParser("sandbox-broker", "Tool for connect gVisor and web interface")
 	address := parser.String("a", "address", &argparse.Options{Required: true, Help: "Socket address"})
 	socketType := parser.String("t", "type", &argparse.Options{Required: true, Help: "Socket type"})
 	rabbit := parser.String("r", "rabbit", &argparse.Options{Required: true, Help: "Rabbit address"})
