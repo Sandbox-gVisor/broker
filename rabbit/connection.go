@@ -2,69 +2,70 @@ package rabbit
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+const (
+	contextLifeTime = 5
+)
+
 type MessageBroker struct {
+	QueueName  string
 	Connection *amqp.Connection
+	ReadChan   *amqp.Channel
+	WriteChan  *amqp.Channel
 }
 
-func (mb *MessageBroker) Open(address string) {
-	var err error
+func (mb *MessageBroker) Open(address string, queueName string) {
+	var (
+		err error
+		ch  *amqp.Channel
+	)
+	mb.QueueName = queueName
 	mb.Connection, err = amqp.Dial(address)
 	if err != nil {
 		log.Fatalf("Can't connect to RabbitMQ server: %s", err)
 	}
+	ch, err = mb.Connection.Channel()
+	if err != nil {
+		log.Fatalf("failed to open a channel. Error: %s", err)
+	}
+	mb.WriteChan = ch
+	ch, err = mb.Connection.Channel()
+	if err != nil {
+		log.Panic(err)
+	}
+	mb.ReadChan = ch
 }
 
 func (mb *MessageBroker) Close() {
-	err := mb.Connection.Close()
+	var err error
+	err = mb.ReadChan.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = mb.WriteChan.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = mb.Connection.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (mb *MessageBroker) SendToQueue(queueName string, body string) {
-	ch, err := mb.Connection.Channel()
-	if err != nil {
-		log.Fatalf("failed to open a channel. Error: %s", err)
-	}
-
-	defer func() {
-		_ = ch.Close() // Закрываем подключение в случае удачной попытки подключения
-	}()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	publishMessage(ch, ctx, queueName, body)
+func (mb *MessageBroker) Send(body string) {
+	ctx, cancel := context.WithTimeout(context.Background(), contextLifeTime*time.Second)
 	defer cancel()
-	log.Printf(" [x] Sent %s\n", body)
+
+	publishMessage(mb.WriteChan, ctx, mb.QueueName, body)
+
+	log.Printf("Sent %s\n", body)
 }
 
-func (mb *MessageBroker) Read(queueName string) []string {
-	ch, err := mb.Connection.Channel()
-	if err != nil {
-		log.Panic(err)
-	}
-	defer ch.Close()
-
-	var (
-		result  []string
-		forever chan struct{}
-	)
-
-	msgs := getConsume(ch, queueName)
-	fmt.Println(msgs)
-	go func() {
-		for d := range msgs {
-			fmt.Println(string(d.Body))
-			result = append(result, string(d.Body))
-		}
-	}()
-	fmt.Println("here")
-	<-forever
-	return result
+func (mb *MessageBroker) Read() <-chan amqp.Delivery {
+	return getConsume(mb.ReadChan, mb.QueueName)
 }

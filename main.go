@@ -12,17 +12,18 @@ import (
 
 func main() {
 	var mb rabbit.MessageBroker
-	mb.Open("amqp://guest:guest@localhost:5672")
+	mb.Open("amqp://guest:guest@localhost:5672", "main")
 	defer mb.Close()
 
 	for i := 0; i < 10; i++ {
-		mb.SendToQueue("main", strconv.Itoa(i))
+		mb.Send(strconv.Itoa(i))
 	}
-	messages := mb.Read("main")
-	fmt.Println(messages)
-	for i, m := range messages {
-		fmt.Println(i, m)
-	}
+	messages := mb.Read()
+	go func() {
+		for m := range messages {
+			fmt.Println(string(m.Body))
+		}
+	}()
 
 	conf := config.LoadConfig()
 	fmt.Println(conf)
