@@ -9,15 +9,15 @@ import (
 
 func checkConfig(config Config) error {
 	if config.Address == "" {
-		errors.New("cant load .env")
+		return errors.New("cant load .env")
 	} else if config.Type == "" {
-		errors.New("cant load .env")
+		return errors.New("cant load .env")
 	} else if config.WebsoketPort == "" {
-		errors.New("cant load .env")
+		return errors.New("cant load .env")
 	} else if config.RabbitAddress == "" {
-		errors.New("cant load .env")
+		return errors.New("cant load .env")
 	} else if config.QueueName == "" {
-		errors.New("cant load .env")
+		return errors.New("cant load .env")
 	}
 	return nil
 }
