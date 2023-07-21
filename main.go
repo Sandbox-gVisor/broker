@@ -5,6 +5,7 @@ import (
 
 	"broker/config"
 	socketserver "broker/socket_server"
+	ws_server "broker/ws_server"
 )
 
 func main() {
@@ -12,5 +13,6 @@ func main() {
 	fmt.Println(conf)
 	ss := socketserver.SocketServer{}
 	ss.Init(conf)
+	go ws_server.RunWS()
 	ss.RunServer()
 }
