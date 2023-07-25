@@ -1,7 +1,7 @@
 package ws_server
 
 import (
-	"broker/rabbit"
+	"broker/storage"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
@@ -16,7 +16,7 @@ const (
 	PullCmd = "pull"
 )
 
-func RunWS(broker rabbit.MessageBroker, port string) {
+func RunWS(broker storage.Storage, port string) {
 	fmt.Println("Running ws")
 
 	err := http.ListenAndServe(port,
@@ -25,6 +25,28 @@ func RunWS(broker rabbit.MessageBroker, port string) {
 				var conn, _, _, err = ws.UpgradeHTTP(r, w)
 				if err != nil {
 					log.Fatal(err)
+				defer conn.Close()
+
+				for {
+					msg, _, err := wsutil.ReadClientData(conn)
+					fmt.Println(string(msg))
+					if err != nil {
+						continue
+					}
+					/*
+						if string(msg) == PullCmd { // if pull from client, subscrube to broker
+							messages := broker.Read()
+							go func() {
+								for m := range messages {
+									err = wsutil.WriteServerMessage(conn, op, m.Body)
+									if err != nil {
+										log.Println(err)
+										continue
+									}
+								}
+							}()
+						}
+					*/
 				}
 
 				handleConnection(conn, broker)
