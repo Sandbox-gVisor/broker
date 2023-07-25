@@ -5,16 +5,16 @@ import (
 	"log"
 	"net"
 
-	"broker/rabbit"
+	"broker/storage"
 )
 
 type SocketServer struct {
-	Broker  rabbit.MessageBroker
+	Broker  storage.Storage
 	Address string
 	Type    string
 }
 
-func (self *SocketServer) Init(broker rabbit.MessageBroker, address string, t string) {
+func (self *SocketServer) Init(broker storage.Storage, address string, t string) {
 	self.Broker = broker
 	self.Address = address
 	self.Type = t
@@ -47,5 +47,5 @@ func (self *SocketServer) ProcessClient(connection net.Conn) {
 		log.Println("Error reading:", err.Error())
 	}
 	data := string(buffer[:mLen])
-	self.Broker.Send(data)
+	fmt.Println(data)
 }

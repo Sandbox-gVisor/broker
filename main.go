@@ -2,20 +2,20 @@ package main
 
 import (
 	"broker/config"
-	"broker/rabbit"
 	socketserver "broker/socket_server"
+	"broker/storage"
 	ws_server "broker/ws_server"
 )
 
 func main() {
 	conf := config.LoadConfig()
 
-	var mb rabbit.MessageBroker
-	mb.Open(conf.RabbitAddress, conf.QueueName)
-	defer mb.Close()
-	go ws_server.RunWS(mb, ":"+conf.WebsoketPort)
+	var store storage.Storage
+	store.Init()
+	defer store.Close()
+	go ws_server.RunWS(store, ":"+conf.WebsoketPort)
 
 	ss := socketserver.SocketServer{}
-	ss.Init(mb, conf.Address, conf.Type)
+	ss.Init(store, conf.Address, conf.Type)
 	ss.RunServer()
 }
