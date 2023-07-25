@@ -25,30 +25,7 @@ func RunWS(broker storage.Storage, port string) {
 				var conn, _, _, err = ws.UpgradeHTTP(r, w)
 				if err != nil {
 					log.Fatal(err)
-				defer conn.Close()
-
-				for {
-					msg, _, err := wsutil.ReadClientData(conn)
-					fmt.Println(string(msg))
-					if err != nil {
-						continue
-					}
-					/*
-						if string(msg) == PullCmd { // if pull from client, subscrube to broker
-							messages := broker.Read()
-							go func() {
-								for m := range messages {
-									err = wsutil.WriteServerMessage(conn, op, m.Body)
-									if err != nil {
-										log.Println(err)
-										continue
-									}
-								}
-							}()
-						}
-					*/
 				}
-
 				handleConnection(conn, broker)
 			}()
 		}))
@@ -57,11 +34,11 @@ func RunWS(broker storage.Storage, port string) {
 	}
 }
 
-func handleConnection(conn net.Conn, broker rabbit.MessageBroker) {
+func handleConnection(conn net.Conn, broker storage.Storage) {
 	defer conn.Close()
 
 	for {
-		msg, op, err := wsutil.ReadClientData(conn)
+		msg, _, err := wsutil.ReadClientData(conn)
 		fmt.Println(string(msg))
 		if err != nil {
 			log.Println(err)
@@ -69,8 +46,8 @@ func handleConnection(conn net.Conn, broker rabbit.MessageBroker) {
 		}
 
 		if string(msg) == PullCmd { // if pull from client, subscribe to broker
-			messages := broker.Read()
-			writeToSocket(messages, conn, op)
+			//messages := broker.LoadPage()
+			//writeToSocket(messages, conn, op)
 		}
 	}
 }
