@@ -14,32 +14,32 @@ type SocketServer struct {
 	Type    string
 }
 
-func (self *SocketServer) Init(broker rabbit.MessageBroker, address string, t string) {
-	self.Broker = broker
-	self.Address = address
-	self.Type = t
+func (serv *SocketServer) Init(broker rabbit.MessageBroker, address string, t string) {
+	serv.Broker = broker
+	serv.Address = address
+	serv.Type = t
 }
 
-func (self *SocketServer) RunServer() {
+func (serv *SocketServer) RunServer() {
 	fmt.Println("Server Running...")
-	server, err := net.Listen(self.Type, self.Address)
+	server, err := net.Listen(serv.Type, serv.Address)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	defer server.Close()
-	log.Print("Listening on " + self.Address)
+	log.Print("Listening on " + serv.Address)
 	for {
 		connection, err := server.Accept()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 		fmt.Println("client connected")
-		go self.ProcessClient(connection)
+		go serv.ProcessClient(connection)
 	}
 
 }
 
-func (self *SocketServer) ProcessClient(connection net.Conn) {
+func (serv *SocketServer) ProcessClient(connection net.Conn) {
 	buffer := make([]byte, 1024)
 	mLen, err := connection.Read(buffer)
 	defer connection.Close()
@@ -47,5 +47,5 @@ func (self *SocketServer) ProcessClient(connection net.Conn) {
 		log.Println("Error reading:", err.Error())
 	}
 	data := string(buffer[:mLen])
-	self.Broker.Send(data)
+	serv.Broker.Send(data)
 }
