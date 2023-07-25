@@ -16,6 +16,5 @@ func (store *Storage) LoadPage(pageIndex int, pageSize int) []string {
 			result = append(result, row)
 		}
 	}
-	store.SetPulled(true)
 	return result
 }

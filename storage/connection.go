@@ -38,14 +38,8 @@ func (store *Storage) Close() {
 	}
 }
 
-func (store *Storage) SetPulled(status bool) {
-	var value int
-	if status {
-		value = 1
-	} else {
-		value = 0
-	}
-	err := store.RedisClient.Set(store.ctx, "pulled", value, 0).Err()
+func (store *Storage) EmitUpdate() {
+	err := store.RedisClient.Publish(store.ctx, "update", "payload").Err()
 	if err != nil {
 		log.Println(err)
 	}
@@ -76,5 +70,5 @@ func (store *Storage) AddString(str string) {
 		fmt.Println(err)
 		return
 	}
-	store.SetPulled(false)
+	store.EmitUpdate()
 }
