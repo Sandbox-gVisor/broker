@@ -20,26 +20,26 @@ func (self *SocketServer) Init(broker storage.Storage, address string, t string)
 	self.Type = t
 }
 
-func (self *SocketServer) RunServer() {
+func (serv *SocketServer) RunServer() {
 	fmt.Println("Server Running...")
-	server, err := net.Listen(self.Type, self.Address)
+	server, err := net.Listen(serv.Type, serv.Address)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	defer server.Close()
-	log.Print("Listening on " + self.Address)
+	log.Print("Listening on " + serv.Address)
 	for {
 		connection, err := server.Accept()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 		fmt.Println("client connected")
-		go self.ProcessClient(connection)
+		go serv.ProcessClient(connection)
 	}
 
 }
 
-func (self *SocketServer) ProcessClient(connection net.Conn) {
+func (serv *SocketServer) ProcessClient(connection net.Conn) {
 	buffer := make([]byte, 1024)
 	mLen, err := connection.Read(buffer)
 	defer connection.Close()
@@ -47,5 +47,6 @@ func (self *SocketServer) ProcessClient(connection net.Conn) {
 		log.Println("Error reading:", err.Error())
 	}
 	data := string(buffer[:mLen])
+	serv.Broker.Send(data)
 	fmt.Println(data)
 }
