@@ -4,6 +4,7 @@ import (
 	"broker/storage"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -35,7 +36,8 @@ func (serv *SocketServer) RunServer() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	//defer server.Close()
+
+	defer server.Close()
 	log.Print("Listening on " + serv.Address)
 	for {
 		connection, err := server.Accept()
@@ -55,30 +57,24 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 		var logs map[string]interface{}
 		err := dec.Decode(&logs)
 
-		fmt.Println(logs)
-
 		if err != nil {
 			log.Println("Error reading:", err.Error())
+			if err == io.EOF {
+				break
+			}
+
 			continue
-			//return
 		}
 
 		jsonLogs, err := json.Marshal(&logs)
 		if err != nil {
 			log.Println("Error while marshaling logs:", err.Error())
 			continue
-			//return
 		}
 
 		serv.Broker.AddString(string(jsonLogs))
 	}
-	/*buffer := make([]byte, 1024)
-	mLen, err := connection.Read(buffer)
-	defer connection.Close()
-	if err != nil {
-		log.Println("Error reading:", err.Error())
-	}
-	data := string(buffer[:mLen])
-	serv.Broker.AddString(data)
-	fmt.Println(data)*/
+
+	log.Println("Closing connection with client...")
+	connection.Close()
 }
