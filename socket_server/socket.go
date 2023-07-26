@@ -40,11 +40,12 @@ func (serv *SocketServer) RunServer() {
 	defer server.Close()
 	log.Print("Listening on " + serv.Address)
 	for {
+		log.Println("Waiting for client...")
 		connection, err := server.Accept()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		fmt.Println("client connected")
+		fmt.Println("Client connected!")
 		go serv.ProcessClient(connection)
 	}
 }
