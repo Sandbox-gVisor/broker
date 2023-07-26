@@ -2,8 +2,8 @@ package config
 
 func getDefaultConfig() Config {
 	return Config{
-		Address:       "/tmp/runsc/test-sock",
-		Type:          "unix",
+		Address:       "localhost:12001",
+		Type:          "tcp",
 		WebsoketPort:  "8080",
 		QueueName:     "main",
 		RabbitAddress: "amqp://guest:guest@localhost:5672/",
