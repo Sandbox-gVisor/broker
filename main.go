@@ -11,8 +11,7 @@ func main() {
 
 	var store storage.Storage
 	store.Init()
-	defer store.Close() // ?
-	/*go ws_server.RunWS(store, ":"+conf.WebsoketPort)*/
+	defer store.Close()
 
 	ss := socketserver.SocketServer{}
 	ss.Init(store, conf.Address, conf.Type)
