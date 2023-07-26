@@ -1,12 +1,12 @@
 package socketserver
 
 import (
+	"broker/storage"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net"
-
-	"broker/storage"
+	"os"
 )
 
 type SocketServer struct {
@@ -29,11 +29,13 @@ func (serv *SocketServer) Init(broker storage.Storage, address string, t string)
 // Server will listen on address that is written in serv.Address
 func (serv *SocketServer) RunServer() {
 	fmt.Println("Server Running...")
+
+	_ = os.Remove(serv.Address)
 	server, err := net.Listen(serv.Type, serv.Address)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	defer server.Close()
+	//defer server.Close()
 	log.Print("Listening on " + serv.Address)
 	for {
 		connection, err := server.Accept()
@@ -43,26 +45,33 @@ func (serv *SocketServer) RunServer() {
 		fmt.Println("client connected")
 		go serv.ProcessClient(connection)
 	}
-
 }
 
 // ProcessClient handles connected client
 func (serv *SocketServer) ProcessClient(connection net.Conn) {
-	logs := map[string]interface{}{}
 	dec := json.NewDecoder(connection)
-	err := dec.Decode(&logs)
-	if err != nil {
-		log.Println("Error reading:", err.Error())
-		return
-	}
 
-	jsonLogs, err := json.Marshal(&logs)
-	if err != nil {
-		log.Println("Error while marshaling logs:", err.Error())
-		return
-	}
+	for {
+		var logs map[string]interface{}
+		err := dec.Decode(&logs)
 
-	serv.Broker.AddString(string(jsonLogs))
+		fmt.Println(logs)
+
+		if err != nil {
+			log.Println("Error reading:", err.Error())
+			continue
+			//return
+		}
+
+		jsonLogs, err := json.Marshal(&logs)
+		if err != nil {
+			log.Println("Error while marshaling logs:", err.Error())
+			continue
+			//return
+		}
+
+		serv.Broker.AddString(string(jsonLogs))
+	}
 	/*buffer := make([]byte, 1024)
 	mLen, err := connection.Read(buffer)
 	defer connection.Close()
