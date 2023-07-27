@@ -1,12 +1,14 @@
 package config
 
+import "os"
+
 func getDefaultConfig() Config {
 	return Config{
-		Address:       "localhost:12001",
-		Type:          "tcp",
-		WebsoketPort:  "8080",
-		QueueName:     "main",
-		RabbitAddress: "amqp://guest:guest@localhost:5672/",
+		Address: /*"localhost:12001"*/ os.Getenv("REDIS_ADDR"),
+		Type:                          "tcp",
+		WebsoketPort:                  "8080",
+		QueueName:                     "main",
+		RabbitAddress:                 "amqp://guest:guest@localhost:5672/",
 	}
 }
 
