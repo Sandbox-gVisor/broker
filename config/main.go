@@ -1,10 +1,8 @@
 package config
 
-import "os"
-
 func getDefaultConfig() Config {
 	return Config{
-		Address: /*"localhost:12001"*/ os.Getenv("REDIS_ADDR"),
+		Address: 		       "localhost:12001",
 		Type:                          "tcp",
 		WebsoketPort:                  "8080",
 		QueueName:                     "main",

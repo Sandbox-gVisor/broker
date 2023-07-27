@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"os"
 	"context"
 	"fmt"
 	"log"
@@ -16,7 +17,7 @@ type Storage struct {
 
 func (store *Storage) Init() {
 	store.RedisClient = *redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
+		Addr:     os.Getenv("REDIS_ADDR"),
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
