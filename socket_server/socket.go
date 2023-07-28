@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 )
 
 type SocketServer struct {
@@ -31,7 +30,7 @@ func (serv *SocketServer) Init(broker storage.Storage, address string, t string)
 func (serv *SocketServer) RunServer() {
 	fmt.Println("Server Running...")
 
-	_ = os.Remove(serv.Address)
+	//_ = os.Remove(serv.Address)
 	server, err := net.Listen(serv.Type, serv.Address)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -59,7 +58,7 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 		err := dec.Decode(&logs)
 
 		log.Println(logs)
-		
+
 		if err != nil {
 			log.Println("Error reading:", err.Error())
 			if err == io.EOF {
