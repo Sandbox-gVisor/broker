@@ -58,7 +58,7 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 		var logs map[string]interface{}
 		err := dec.Decode(&logs)
 
-		log.Println(log)
+		log.Println(logs)
 		
 		if err != nil {
 			log.Println("Error reading:", err.Error())
