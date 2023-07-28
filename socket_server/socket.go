@@ -34,7 +34,7 @@ func (serv *SocketServer) RunServer() {
 		log.Println("Waiting for client...")
 		connection, err := server.Accept()
 		if err != nil {
-			log.Fatal(err.Error())
+			log.Println(err.Error())
 		}
 		log.Println("Client connected " + connection.LocalAddr().String())
 		go serv.ProcessClient(connection)
