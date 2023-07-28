@@ -3,7 +3,6 @@ package storage
 import (
 	"os"
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 
@@ -58,17 +57,17 @@ func (store *Storage) GetLength() (int, error) {
 func (store *Storage) AddString(str string) {
 	index, err := store.GetLength()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	err = store.RedisClient.Set(store.ctx, strconv.Itoa(index), str, 0).Err()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	err = store.RedisClient.Set(store.ctx, "length", index+1, 0).Err()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	store.EmitUpdate()
