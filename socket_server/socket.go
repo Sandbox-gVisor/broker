@@ -45,7 +45,7 @@ func (serv *SocketServer) RunServer() {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		fmt.Println("Client connected!")
+		log.Println("Client connected!")
 		go serv.ProcessClient(connection)
 	}
 }
