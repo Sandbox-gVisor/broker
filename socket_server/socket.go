@@ -49,8 +49,6 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 		var logs map[string]interface{}
 		err := dec.Decode(&logs)
 
-		log.Println(logs)
-
 		if err != nil {
 			log.Println("Error reading: ", err.Error())
 			if err == io.EOF {
@@ -69,6 +67,6 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 		serv.Broker.AddString(string(jsonLogs))
 	}
 
-	log.Println("Closing connection with client" + connection.LocalAddr().String() + "...")
+	log.Println("Closing connection with client: " + connection.LocalAddr().String() + "...")
 	connection.Close()
 }
