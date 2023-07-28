@@ -3,4 +3,4 @@ WORKDIR /app
 COPY . ./
 RUN go build -buildvcs=false
 EXPOSE 12001
-CMD ["./broker"]
+CMD ["./broker", "0.0.0.0:12001"]
