@@ -3,48 +3,40 @@ package socketserver
 import (
 	"broker/storage"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net"
 )
 
 type SocketServer struct {
-	Broker  storage.Storage
-	Address string
-	Type    string
-}
-
-type Log struct {
-}
-
-// Init configures server socket for running. Broker and address are taken from config
-func (serv *SocketServer) Init(broker storage.Storage, address string, t string) {
-	serv.Broker = broker
-	serv.Address = address
-	serv.Type = t
+	Broker       storage.Storage
+	LocalAddress string
 }
 
 // RunServer runs server with config and waits for connections.
-// Server will listen on address that is written in serv.Address
+// Server will listen on address that is written in serv.LocalAddress
 func (serv *SocketServer) RunServer() {
-	fmt.Println("Server Running...")
+	log.Println("Server Running...")
 
-	//_ = os.Remove(serv.Address)
-	server, err := net.Listen(serv.Type, serv.Address)
+	laddr, err := net.ResolveTCPAddr("tcp", serv.LocalAddress)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	server, err := net.ListenTCP("tcp", laddr)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	defer server.Close()
-	log.Print("Listening on " + serv.Address)
+	log.Println("Listening on " + laddr.String())
 	for {
 		log.Println("Waiting for client...")
 		connection, err := server.Accept()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		log.Println("Client connected!")
+		log.Println("Client connected " + connection.LocalAddr().String())
 		go serv.ProcessClient(connection)
 	}
 }
@@ -60,7 +52,7 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 		log.Println(logs)
 
 		if err != nil {
-			log.Println("Error reading:", err.Error())
+			log.Println("Error reading: ", err.Error())
 			if err == io.EOF {
 				break
 			}
@@ -70,13 +62,13 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 
 		jsonLogs, err := json.Marshal(&logs)
 		if err != nil {
-			log.Println("Error while marshaling logs:", err.Error())
+			log.Println("Error while marshaling logs: ", err.Error())
 			continue
 		}
 
 		serv.Broker.AddString(string(jsonLogs))
 	}
 
-	log.Println("Closing connection with client...")
+	log.Println("Closing connection with client" + connection.LocalAddr().String() + "...")
 	connection.Close()
 }

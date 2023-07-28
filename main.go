@@ -1,19 +1,18 @@
 package main
 
 import (
-	"broker/config"
 	socketserver "broker/socket_server"
 	"broker/storage"
+	"log"
+	"os"
 )
 
 func main() {
-	conf := config.LoadConfig()
-
 	var store storage.Storage
 	store.Init()
 	defer store.Close()
+	log.Println(store.RedisClient.String())
 
-	ss := socketserver.SocketServer{}
-	ss.Init(store, conf.Address, conf.Type)
+	ss := socketserver.SocketServer{Broker: store, LocalAddress: os.Args[1]}
 	ss.RunServer()
 }
