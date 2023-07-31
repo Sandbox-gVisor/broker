@@ -32,6 +32,10 @@ func (store *Storage) Init() {
 	}
 }
 
+func (store *Storage) FlushRedis() {
+	store.RedisClient.Del(store.ctx, "length", "pulled")
+}
+
 func (store *Storage) Close() {
 	if err := store.RedisClient.Close(); err != nil {
 		log.Fatal(err)
