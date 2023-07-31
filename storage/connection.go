@@ -33,7 +33,14 @@ func (store *Storage) Init() {
 }
 
 func (store *Storage) FlushRedis() {
-	store.RedisClient.Del(store.ctx, "length", "pulled")
+	err := store.RedisClient.Set(store.ctx, "length", 0, 0).Err()
+	if err != nil {
+		log.Println(err)
+	}
+	err = store.RedisClient.Set(store.ctx, "pulled", 1, 0).Err()
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (store *Storage) Close() {
