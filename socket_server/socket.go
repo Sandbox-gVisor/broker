@@ -69,6 +69,4 @@ func (serv *SocketServer) ProcessClient(connection net.Conn) {
 
 	log.Println("Closing connection with client: " + connection.LocalAddr().String() + "...")
 	connection.Close()
-
-	serv.Broker.FlushRedis()
 }
