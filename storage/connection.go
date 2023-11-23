@@ -11,7 +11,7 @@ import (
 
 type Storage struct {
 	RedisClient redis.Client
-	ctx         context.Context
+	Ctx         context.Context
 }
 
 func (store *Storage) Init() {
@@ -20,24 +20,24 @@ func (store *Storage) Init() {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-	store.ctx = context.Background()
+	store.Ctx = context.Background()
 
-	err := store.RedisClient.Set(store.ctx, "length", 0, 0).Err()
+	err := store.RedisClient.Set(store.Ctx, "length", 0, 0).Err()
 	if err != nil {
 		log.Println(err)
 	}
-	err = store.RedisClient.Set(store.ctx, "pulled", 1, 0).Err()
+	err = store.RedisClient.Set(store.Ctx, "pulled", 1, 0).Err()
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func (store *Storage) FlushRedis() {
-	err := store.RedisClient.Set(store.ctx, "length", 0, 0).Err()
+	err := store.RedisClient.Set(store.Ctx, "length", 0, 0).Err()
 	if err != nil {
 		log.Println(err)
 	}
-	err = store.RedisClient.Set(store.ctx, "pulled", 1, 0).Err()
+	err = store.RedisClient.Set(store.Ctx, "pulled", 1, 0).Err()
 	if err != nil {
 		log.Println(err)
 	}
@@ -50,14 +50,14 @@ func (store *Storage) Close() {
 }
 
 func (store *Storage) EmitUpdate() {
-	err := store.RedisClient.Publish(store.ctx, "update", "payload").Err()
+	err := store.RedisClient.Publish(store.Ctx, "update", "payload").Err()
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func (store *Storage) GetLength() (int, error) {
-	val, err := store.RedisClient.Get(store.ctx, "length").Result()
+	val, err := store.RedisClient.Get(store.Ctx, "length").Result()
 	if err != nil {
 		return 0, err
 	}
@@ -71,12 +71,12 @@ func (store *Storage) AddString(str string) {
 		log.Println(err)
 		return
 	}
-	err = store.RedisClient.Set(store.ctx, strconv.Itoa(index), str, 0).Err()
+	err = store.RedisClient.Set(store.Ctx, strconv.Itoa(index), str, 0).Err()
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	err = store.RedisClient.Set(store.ctx, "length", index+1, 0).Err()
+	err = store.RedisClient.Set(store.Ctx, "length", index+1, 0).Err()
 	if err != nil {
 		log.Println(err)
 		return
