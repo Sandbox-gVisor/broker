@@ -1,4 +1,4 @@
-FROM golang:1.18.1
+FROM golang:1.19.1
 WORKDIR /app
 COPY . ./
 RUN go build -buildvcs=false
