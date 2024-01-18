@@ -40,12 +40,50 @@ func initDatabase(pool *pgxpool.Pool, ctx context.Context) {
 		    id      bigserial,
 		    message jsonb
 		)
+	
 	`)
 
-	log.Println("Table was successfully created! Tag: ", tag)
 	if err != nil {
 		log.Printf("Unable to create table: %v\n", err)
 		os.Exit(1)
+	} else {
+		log.Println("Table was successfully created! Tag: ", tag)
+	}
+
+	tag, err = pool.Exec(ctx, `
+		CREATE TABLE IF NOT EXISTS debugtable (
+		    id      bigserial,
+		    text varchar(10)
+		)
+	
+	`)
+
+	if err != nil {
+		log.Printf("Unable to create table: %v\n", err)
+		os.Exit(1)
+	} else {
+		log.Println("Table was successfully created! Tag: ", tag)
+	}
+
+	tag, err = pool.Exec(ctx, `
+          CREATE OR REPLACE FUNCTION notify_ws_server() RETURNS TRIGGER AS $$
+          BEGIN
+			INSERT INTO debugtable (text) VALUES ('success');
+			PERFORM pg_notify('update', row_to_json(NEW)::text);
+			RETURN NULL;
+		  END;
+		  $$ LANGUAGE plpgsql;
+
+		  CREATE TRIGGER messages_table_change
+		  AFTER INSERT OR UPDATE OR DELETE ON messages
+		  FOR EACH ROW EXECUTE FUNCTION notify_ws_server();
+	`)
+
+	if err != nil {
+		log.Printf("Unable to create trigger: %v\n", err)
+		os.Exit(1)
+	} else {
+		log.Println("Trigger was successfully created! Tag: ", tag)
 	}
 }
 
@@ -65,7 +103,5 @@ func (store *PostgresStorage) SaveMessage(msg string) {
 	_, err := store.ConnectionPool.Exec(store.Ctx, `INSERT INTO messages (message) VALUES (CAST ($1 AS jsonb))`, msg)
 	if err != nil {
 		log.Println("Couldn't insert into table messages!")
-	} else {
-		log.Println("Successfully inserted into messages!")
 	}
 }
