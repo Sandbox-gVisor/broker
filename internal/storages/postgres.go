@@ -82,7 +82,7 @@ func (store *PostgresStorage) Close() {
 }
 
 func (store *PostgresStorage) FlushStorage() {
-	// ??
+	// unnecessary method for Postgres storage
 }
 
 func (store *PostgresStorage) SaveMessage(msg string) {
